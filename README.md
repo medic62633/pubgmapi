@@ -1,109 +1,57 @@
-# PUBG Mobile User ID Checker for Nuxt.js
+# PUBG Mobile User ID Checker API
 
-A complete solution for checking PUBG Mobile user IDs with Cloudflare bypass using proxy and cloudscraper.
+A high-performance PUBG Mobile user ID checker with Cloudflare bypass using proxy and cloudscraper.
 
 ## Features
 
-- ✅ **Real PUBG API Integration** - Uses actual PUBG Mobile API
-- ✅ **Cloudflare Bypass** - Successfully bypasses Cloudflare protection
-- ✅ **Proxy Support** - Uses DataImpulse proxy for reliable access
-- ✅ **Nuxt.js Integration** - Full-stack solution with Vue frontend
-- ✅ **Fast Performance** - Optimized for speed with session reuse
-- ✅ **Beautiful UI** - Modern, responsive interface
+* ✅ **Real PUBG API Integration** - Uses actual PUBG Mobile API
+* ✅ **Cloudflare Bypass** - Successfully bypasses Cloudflare protection
+* ✅ **Proxy Support** - Uses working proxy for reliable access
+* ✅ **FastAPI Server** - High-performance REST API
+* ✅ **Rate Limiting** - 30 requests per minute per IP
+* ✅ **Session Reuse** - Optimized for speed with persistent sessions
+* ✅ **Parallel Processing** - Can handle multiple requests simultaneously
 
-## Files Structure
+## Project Structure
 
 ```
 pubgapiw/
-├── pubg_checker.py              # Interactive CLI version
-├── pubg_checker_api.py          # API version for Nuxt.js
-├── server/
-│   └── api/
-│       └── check-pubg.post.ts   # Nuxt.js API endpoint
+├── pubgapi.py              # Core PUBG checker with optimized logic
+├── pubgapi_server.py       # FastAPI server with endpoints
+├── requirements.txt        # Python dependencies
+├── deploy.sh              # VPS deployment script
+├── app.vue                # Nuxt.js main app
 ├── pages/
-│   └── pubg-checker.vue         # Vue frontend page
-└── README.md                    # This file
+│   └── pubg-checker.vue   # Web interface
+├── assets/
+│   └── css/
+│       └── main.css       # Styles
+└── README.md              # This file
 ```
 
-## Setup
+## API Endpoints
 
-### 1. Install Python Dependencies
-
+### 1. GET `/uid/{userid}` - Check user ID via URL path
 ```bash
-pip install cloudscraper curl-cffi
+curl "http://localhost:8000/uid/123456789"
 ```
 
-### 2. Configure Proxy (Optional)
-
-The script uses a working proxy by default. If you want to use your own:
-
-Edit `pubg_checker_api.py` and update the proxy credentials:
-
-```python
-proxy_host = "your-proxy-host.com"
-proxy_port = "your-port"
-proxy_username = "your-username"
-proxy_password = "your-password"
-```
-
-### 3. Test the Python Script
-
+### 2. POST `/check` - Check user ID via JSON body
 ```bash
-# Test single user ID
-python pubg_checker_api.py 5204837417
-
-# Expected output:
-# {"status": "success", "userid": "5204837417", "player_name": "Agusbhaji", "openid": "12199295050974504", "valid": true}
+curl -X POST "http://localhost:8000/check" \
+     -H "Content-Type: application/json" \
+     -d '{"userid": "123456789"}'
 ```
 
-### 4. Nuxt.js Integration
-
-The project includes:
-
-- **API Endpoint**: `/server/api/check-pubg.post.ts`
-- **Frontend Page**: `/pages/pubg-checker.vue`
-
-#### API Usage
-
-```javascript
-// POST /api/check-pubg
-const response = await $fetch('/api/check-pubg', {
-  method: 'POST',
-  body: {
-    userid: '5204837417'
-  }
-})
-
-// Response format:
-{
-  "status": "success",
-  "userid": "5204837417",
-  "player_name": "Agusbhaji",
-  "openid": "12199295050974504",
-  "valid": true
-}
-```
-
-#### Frontend Usage
-
-Visit `/pubg-checker` in your Nuxt.js app to use the web interface.
-
-## How It Works
-
-1. **Cloudflare Bypass**: Uses `cloudscraper` library to bypass Cloudflare protection
-2. **Proxy Integration**: Routes requests through DataImpulse proxy for reliable access
-3. **Session Management**: Establishes session once and reuses it for faster requests
-4. **Real API**: Connects to actual PUBG Mobile API at `https://api.elitedias.com/checkid`
-
-## Response Types
+## Response Format
 
 ### Success Response
 ```json
 {
   "status": "success",
-  "userid": "5204837417",
-  "player_name": "Agusbhaji",
-  "openid": "12199295050974504",
+  "userid": "123456789",
+  "player_name": "PlayerName",
+  "openid": "openid_value",
   "valid": true
 }
 ```
@@ -121,40 +69,106 @@ Visit `/pubg-checker` in your Nuxt.js app to use the web interface.
 ```json
 {
   "status": "error",
-  "userid": "5204837417",
-  "error": "API request failed: HTTP 403"
+  "userid": "123456789",
+  "error": "error_message"
 }
 ```
 
+## Local Development
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the Server
+```bash
+uvicorn pubgapi_server:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 3. Test the API
+- Visit: `http://localhost:8000/docs` for interactive API docs
+- Test endpoint: `http://localhost:8000/uid/123456789`
+
+## VPS Deployment
+
+### Quick Deployment
+```bash
+# Make deployment script executable
+chmod +x deploy.sh
+
+# Run deployment script
+./deploy.sh
+```
+
+### Manual Deployment Steps
+
+1. **Connect to your VPS via SSH**
+2. **Clone or upload your project files**
+3. **Run the deployment script:**
+   ```bash
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+
+### Post-Deployment
+
+After deployment, your API will be available at:
+- **API Base URL:** `http://YOUR_VPS_IP`
+- **API Documentation:** `http://YOUR_VPS_IP/docs`
+- **Example Usage:** `http://YOUR_VPS_IP/uid/123456789`
+
 ## Performance
 
-- **Single Check**: ~2-3 seconds
-- **Session Reuse**: Faster subsequent requests
-- **Parallel Processing**: Can handle multiple requests simultaneously
+* **Single Check:** ~1-3 seconds
+* **Session Reuse:** Faster subsequent requests
+* **Rate Limit:** 30 requests/minute per IP
+* **Parallel Processing:** Up to 10 concurrent requests
+
+## Rate Limiting
+
+- **30 requests per minute per IP address**
+- Returns HTTP 429 when exceeded
+- Automatic retry after rate limit period
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Python not found**: Ensure Python is installed and in PATH
-2. **Module not found**: Install required packages with pip
-3. **Proxy errors**: Check proxy credentials and connectivity
-4. **Cloudflare blocking**: The script should handle this automatically
+1. **Proxy Connection Failed**
+   - Check proxy credentials in `pubgapi.py`
+   - Verify proxy service is active
 
-### Debug Mode
+2. **Cloudflare Blocking**
+   - The script handles this automatically
+   - If issues persist, check proxy configuration
 
-To see detailed output, modify the Python script to add debug prints:
+3. **Service Not Starting**
+   - Check logs: `sudo journalctl -u pubgapi -f`
+   - Verify Python dependencies are installed
 
-```python
-print(f"Debug: Checking user ID {userid}", file=sys.stderr)
+### Service Management
+
+```bash
+# Check service status
+sudo systemctl status pubgapi
+
+# Restart service
+sudo systemctl restart pubgapi
+
+# View logs
+sudo journalctl -u pubgapi -f
+
+# Stop service
+sudo systemctl stop pubgapi
 ```
 
 ## Security Notes
 
-- Keep proxy credentials secure
-- Consider rate limiting for production use
-- Monitor API usage to avoid abuse
-- The proxy credentials in this repo are for demonstration
+* Keep proxy credentials secure
+* Monitor API usage to avoid abuse
+* Consider implementing additional authentication for production
+* The proxy credentials are for demonstration purposes
 
 ## License
 
@@ -164,6 +178,6 @@ This project is for educational purposes. Please respect PUBG Mobile's terms of 
 
 For issues or questions:
 1. Check the troubleshooting section
-2. Verify Python dependencies are installed
-3. Test the Python script directly first
-4. Check proxy connectivity 
+2. Verify all dependencies are installed
+3. Test the API locally first
+4. Check service logs for errors 
