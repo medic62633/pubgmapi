@@ -40,4 +40,13 @@ def check_single_userid(request: Request, body: UserIdRequest):
     result = checker.check_single_userid(body.userid)
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["error"])
+    return result
+
+@app.get("/uid/{userid}")
+@limiter.limit("30/minute")
+def check_userid_by_path(request: Request, userid: str):
+    """Check PUBG user ID via URL path parameter"""
+    result = checker.check_single_userid(userid)
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result["error"])
     return result 
