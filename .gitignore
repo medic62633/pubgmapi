@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node / Nuxt
+node_modules/
+.nuxt/
+.output/
+dist/
+.env
+
+# Results / misc
+results_*.json
+.DS_Store
